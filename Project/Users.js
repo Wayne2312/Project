@@ -149,8 +149,6 @@ function findUserLocation() {
     });
 }*/  
 
-
-// Global variables
 let currentLocation = "Nairobi";
 let currentWeatherData = {};
 let hourlyForecastData = {};
@@ -158,7 +156,6 @@ let dailyForecastData = {};
 let historicalWeatherData = {};
 let tempChart, precipChart;
 
-// DOM elements
 const locationInput = document.getElementById('location-input');
 const searchBtn = document.getElementById('search-btn');
 const currentLocationEl = document.getElementById('current-location');
@@ -179,7 +176,6 @@ const dailyForecastEl = document.getElementById('daily-forecast');
 const historyGridEl = document.getElementById('history-grid');
 
 
-// Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
     updateCurrentDate();
     searchBtn.addEventListener('click', fetchWeatherData);
@@ -189,24 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
     createStars();
     fetchWeatherData();
 });
-// Creating decorative stars
 function createStars() {
     const container = document.querySelector('.container');
     for (let i = 0; i < 50; i++) {
         const star = document.createElement('div');
         star.className = 'star';
-        // Random size between 1-3px
         const size = Math.random() * 2 + 1;
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
         star.style.top = `${Math.random() * 100}%`;
         star.style.left = `${Math.random() * 100}%`;
-        // Random animation duration
         star.style.setProperty('--duration', `${Math.random() * 3 + 1}s`);
         container.appendChild(star);
     }
 }
-//Updating da dates
 function updateCurrentDate() {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     currentDateEl.textContent = new Date().toLocaleDateString('en-US', options);
@@ -214,7 +206,7 @@ function updateCurrentDate() {
 async function fetchWeatherData() {
     const location = locationInput.value || "Nairobi";
     currentLocation = location;
-    try {//coordinates
+    try {
         const geocodingUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1`;
         const geocodingResponse = await fetch(geocodingUrl);
         const geocodingData = await geocodingResponse.json();
@@ -223,16 +215,13 @@ async function fetchWeatherData() {
         }
         const { latitude, longitude, name, admin1, country } = geocodingData.results[0];
         currentLocationEl.textContent = `${name}, ${admin1 || country}`;
-        // Get current date and date 7 days ago for historical data
         const now = new Date();
         const pastDate = new Date();
         pastDate.setDate(now.getDate() - 7);
         const formatDate = (date) => date.toISOString().split('T')[0];
-        //Fetch da data
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,apparent_temperature,precipitation_probability,weathercode,windspeed_10m,pressure_msl,cloudcover,visibility&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,precipitation_sum,precipitation_hours,precipitation_probability_max,windspeed_10m_max&timezone=auto&past_days=7`;
         const weatherResponse = await fetch(weatherUrl);
         const weatherData = await weatherResponse.json();
-        // Process and display data
         processCurrentWeather(weatherData);
         processHourlyForecast(weatherData);
         processDailyForecast(weatherData);
@@ -243,21 +232,16 @@ async function fetchWeatherData() {
         alert("Could not fetch weather data. Please try another location.");
     }
 }
-// Process current weather data
 function processCurrentWeather(data) {
     const current = data.current_weather;
     const hourly = data.hourly;
     const currentTime = new Date(current.time);
-    
-    // Find the index of the current hour in hourly data
     const currentHourIndex = hourly.time.findIndex(time => 
         new Date(time).getHours() === currentTime.getHours() && 
         new Date(time).getDate() === currentTime.getDate());
-    // Update current weather display
     currentTempEl.textContent = `${current.temperature}°C`;
     currentDescEl.textContent = getWeatherDescription(current.weathercode);
     currentIconEl.innerHTML = `<i class="${getWeatherIcon(current.weathercode)}"></i>`;
-    // Update additional details from hourly data
     if (currentHourIndex !== -1) {
         feelsLikeEl.textContent = `${hourly.apparent_temperature[currentHourIndex]}°C`;
         humidityEl.textContent = `${hourly.relativehumidity_2m[currentHourIndex]}%`;
@@ -265,12 +249,9 @@ function processCurrentWeather(data) {
         pressureEl.textContent = `${hourly.pressure_msl[currentHourIndex]} hPa`;
         visibilityEl.textContent = `${hourly.visibility[currentHourIndex] / 1000} km`;
         cloudCoverEl.textContent = `${hourly.cloudcover[currentHourIndex]}%`;
-        
-        // Calculate UV index (simplified - Open-Meteo doesn't provide this directly)
         const uvIndex = Math.min(Math.floor(current.temperature / 5), 11);
         uvIndexEl.textContent = `${uvIndex} (${getUvIndexDescription(uvIndex)})`;
     }
-// Get sunset time from daily data
 const todayIndex = data.daily.time.findIndex(time => 
         new Date(time).getDate() === currentTime.getDate());
     if (todayIndex !== -1) {
@@ -278,11 +259,9 @@ const todayIndex = data.daily.time.findIndex(time =>
         sunsetEl.textContent = sunsetTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     }
 }
-// Process hourly forecast data
 function processHourlyForecast(data) {
     const hourly = data.hourly;
     hourlyForecastEl.innerHTML = '';
-    // Display next 24 hours
     const now = new Date();
     const currentHour = now.getHours();
     const startIndex = hourly.time.findIndex(time => 
@@ -305,7 +284,6 @@ function processHourlyForecast(data) {
         hourlyForecastEl.appendChild(hourlyItem);
     }
 }
-// Process daily forecast data
 function processDailyForecast(data) {
     const daily = data.daily;
     dailyForecastEl.innerHTML = '';
@@ -327,11 +305,9 @@ function processDailyForecast(data) {
         dailyForecastEl.appendChild(dailyItem);
     }
 }
-// Process historical weather data
 function processHistoricalWeather(data) {
     const daily = data.daily;
     historyGridEl.innerHTML = '';
-    // Display past 7 days (excluding today)
     for (let i = 1; i < Math.min(8, daily.time.length); i++) {
         const date = new Date(daily.time[i]);
         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -362,7 +338,6 @@ function processHistoricalWeather(data) {
         historyGridEl.appendChild(historyCard);
     }
 }
-// Create charts for temperature and precipitation
 function createCharts(data) {
     const hourly = data.hourly;
     const now = new Date();
@@ -370,13 +345,10 @@ function createCharts(data) {
     const startIndex = hourly.time.findIndex(time => 
         new Date(time).getHours() === currentHour && 
         new Date(time).getDate() === now.getDate());
-    
-    // Prepare data for next 48 hours
     const labels = [];
     const temperatures = [];
     const apparentTemps = [];
     const precipProb = [];
-    
     for (let i = startIndex; i < startIndex + 48 && i < hourly.time.length; i++) {
         const time = new Date(hourly.time[i]);
         labels.push(time.getHours() + 'h');
@@ -384,8 +356,6 @@ function createCharts(data) {
         apparentTemps.push(hourly.apparent_temperature[i]);
         precipProb.push(hourly.precipitation_probability[i]);
     }
-    
-    // Destroy previous charts if they exist
     if (tempChart) tempChart.destroy();
     if (precipChart) precipChart.destroy();
     // Temperature chart
@@ -452,7 +422,6 @@ function createCharts(data) {
             }
         }
     });
-    // Precipitation chart
     const precipCtx = document.getElementById('precip-chart').getContext('2d');
     precipChart = new Chart(precipCtx, {
         type: 'bar',
@@ -499,7 +468,6 @@ function createCharts(data) {
         }
     });
 }
-// Helper function to get weather description from WMO code
 function getWeatherDescription(code) {
     const weatherCodes = {
         0: 'Clear sky',
@@ -533,7 +501,6 @@ function getWeatherDescription(code) {
     };
     return weatherCodes[code] || 'Unknown';
 }
-// Helper function to get Font Awesome icon from WMO code
 function getWeatherIcon(code) {
     if (code === 0) return 'fas fa-sun';
     if (code === 1 || code === 2) return 'fas fa-cloud-sun';
@@ -547,11 +514,13 @@ function getWeatherIcon(code) {
     if (code >= 95 && code <= 99) return 'fas fa-bolt';
     return 'fas fa-question';
 }
-// Helper function to get UV index description
 function getUvIndexDescription(index) {
     if (index <= 2) return 'Low';
     if (index <= 5) return 'Moderate';
     if (index <= 7) return 'High';
     if (index <= 10) return 'Very High';
     return 'Extreme';
+}
+function ifYouLikeItCrownIt(){
+    window.alert("Please rate the web app and leave any tips on how I can improve it")
 }
