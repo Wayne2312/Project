@@ -15,10 +15,21 @@ The Weather Forecast App is a web application that provides accurate and up-to-d
 Follow these steps to set up and run the Weather Forecast App:
 
 1. **Clone the Repository**  
-    git clone https://github.com/Wayne2312/Project
-
-4. **Access the App**  
+    git clone https://github.com/Wayne2312/Project using https
+2. **Ensure the files are in one folder**
+   once you clone the repo ensure all the files are in the project folder
+   
+3. **Access the App**  
     Open your browser and navigate to `http://localhost:3000`.
+
+4. **Open the app**
+   Open project folder and open the html file.
+
+
+   ### Learning Goals
+This project was created to refine knowledge of extracting data using various methods and also enhance my usage of asynchronous functions.
+Moreover, it is a personal goal to challenge myself to create something out of scratch and teach myself concepts of programming that I may not have previously covered.
+   
 
 ### Contributing
 
