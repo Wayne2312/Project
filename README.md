@@ -18,7 +18,7 @@ Follow these steps to set up and run the Weather Forecast App:
     git clone https://github.com/Wayne2312/Project
 
 2. **Access the App**  
-    Open your browser and navigate to http://localhost:5000.
+    Open your browser and navigate to http://localhost:3000.
   
 3. **Navigate and Open**
     Navigate to the cloned files and open the index.html via google chrome 
